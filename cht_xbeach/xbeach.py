@@ -19,7 +19,7 @@ from pyproj import CRS
 from pyproj import Transformer
 import time
 
-from cht.misc.geometry import Point
+from cht_utils.geometry import Point
 
 # constants
 fmt = '%Y-%m-%d %H:%M:%S'
