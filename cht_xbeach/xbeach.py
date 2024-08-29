@@ -231,9 +231,9 @@ class XBeach:
     def make_index_tiles(self, path, zoom_range=None):
         """Make tiles for different zoom levels by saving the index of the xbeach grid cell
         to be used for each world png raster"""
-        from cht.tiling.tiling import deg2num
-        from cht.tiling.tiling import num2deg
-        import cht.misc.fileops as fo
+        from cht_tiling.tiling import deg2num
+        from cht_tiling.tiling import num2deg
+        import cht_utils.fileops as fo
         from scipy.spatial import distance
 
         if not zoom_range:
