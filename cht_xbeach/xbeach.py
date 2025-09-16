@@ -409,7 +409,7 @@ class Params(dict):
     @staticmethod
     def fromfile(filename='params.txt'):
         """read the params/txt file"""
-        with open(filename,'U') as f:
+        with open(filename, 'r', newline='') as f:
             key = None
             values = Params()
             for line in f:
