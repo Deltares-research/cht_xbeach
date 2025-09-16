@@ -20,6 +20,7 @@ from pyproj import Transformer
 import time
 
 from cht_utils.geometry import Point
+from cht_tiling.utils import binary_search, deg2num, int2png, makedir, num2deg
 
 # constants
 fmt = '%Y-%m-%d %H:%M:%S'
@@ -228,11 +229,9 @@ class XBeach:
                     np.savetxt(f, sp2, fmt="%.7i")
                     f.close()
 
-    def make_index_tiles(self, path, zoom_range=None):
+    def make_index_tiles(self, path, zoom_range=None, format="png"):
         """Make tiles for different zoom levels by saving the index of the xbeach grid cell
         to be used for each world png raster"""
-        from cht_tiling.tiling import deg2num
-        from cht_tiling.tiling import num2deg
         import cht_utils.fileops as fo
         from scipy.spatial import distance
 
@@ -282,8 +281,8 @@ class XBeach:
             xv, yv = np.meshgrid(xx, yy)  # Get distance grid for each tile
 
             # Get range of tile indices to be used for the zoom level
-            ix0, iy0 = deg2num(lat_range[0], lon_range[0], izoom)
-            ix1, iy1 = deg2num(lat_range[1], lon_range[1], izoom)
+            ix0, iy0 = deg2num(lat_range[1], lon_range[0], izoom)
+            ix1, iy1 = deg2num(lat_range[0], lon_range[1], izoom)
 
             for i in range(ix0, ix1 + 1):  # loop through x tiles
 
@@ -292,7 +291,7 @@ class XBeach:
 
                 for j in range(iy0, iy1 + 1):
 
-                    file_name = os.path.join(zoom_path_i, str(j) + ".dat")  # Create file for y index
+                    file_name = os.path.join(zoom_path_i, str(j) + f".{format}")  # Create file for y index
 
                     # Compute lat/lon at ll corner of tile
                     lat, lon = num2deg(i, j, izoom)
@@ -301,8 +300,8 @@ class XBeach:
                     xo, yo = transformer_a.transform(lon, lat)
 
                     # Tile grid on local mercator (this is at cell center)
-                    x = xv[:] + xo + 0.5 * dxy
-                    y = yv[:] + yo + 0.5 * dxy
+                    x = xo + xv[:] + 0.5 * dxy
+                    y = yo - yv[:] - 0.5 * dxy
 
                     # Convert tile grid to crs of xbeach model
                     x, y = transformer_b.transform(x, y)
@@ -328,15 +327,21 @@ class XBeach:
 
                     if np.any(ind >= 0):  # Only continue if there is at least on png cell in the domain
 
-                        if not path_okay:  # ensure path exists to save file
+                        # Check whether path exists
+                        if not path_okay: 
                             if not os.path.exists(zoom_path_i):
                                 fo.mkdir(zoom_path_i)
                                 path_okay = True
 
-                        # And write indices to file
-                        fid = open(file_name, "wb")
-                        fid.write(ind)
-                        fid.close()
+                        if format == "dat":
+                            # And write indices to file
+                            fid = open(file_name, "wb")
+                            fid.write(ind)
+                            fid.close()
+                        elif format == "png":
+                            # And write indices to file
+                            # print(file_name)
+                            int2png(ind, file_name)
 
 
     def grid_coordinates(self, loc='cor'):
