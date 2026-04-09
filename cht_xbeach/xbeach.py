@@ -19,7 +19,7 @@ from pyproj import CRS
 from pyproj import Transformer
 import time
 
-from cht_utils.geometry import Point
+from .utils.geometry import Point
 from cht_tiling.utils import binary_search, deg2num, int2png, makedir, num2deg
 
 # constants
